@@ -1,0 +1,68 @@
+#include <iostream>
+#include <cstring>
+#include <string>
+using namespace std;
+char p[10000],t[10000];
+int BFcalculation(char *P,char *T)
+{
+	int length1=strlen(P);
+	int length2=strlen(T);
+	int i=0,j=0;
+	int comparison=0;
+	while(i<length1&&j<length2)
+	{
+		if(P[i]==T[j])
+		{
+		  i++;
+		  j++;
+		}
+		else//匹配失败，向后移动一位从头开始
+		{
+		j=j-i+1;
+		i=0;
+		}
+		comparison++;
+	}
+	return comparison;
+}
+int KMPcalculation(char *P, char *T)
+{
+	int comparison=0,m=0,n=0;
+	int length1=strlen(P);
+	int length2=strlen(T);
+	int next[10000];//创建一个初始为零的数组以此放置模式串
+    memset(next,0,sizeof(next));
+	for (int i=1;i<length1;i++)//提前计算出每个匹配失败的位置应该移动的距离，花费的时间就成了常数时间
+	{
+		if (P[i]==P[next[i-1]])
+			next[i]=next[i-1]+1;
+		else
+			next[i]=0;
+	}
+	while (m<length1&&n<length2)//匹配算法的主体内容
+	{
+		if (P[m]==T[n])
+		{
+			m++;
+			n++;
+		}
+		else
+		{
+			if (m==0)
+				n++;
+			else
+				m=next[m-1];//从上次匹配失败的地方进行匹配，这样就减少了匹配次数，增加了效率
+		}
+		comparison++;
+	}
+	return comparison;
+}
+int main()
+{
+	while (cin>>p>>t)
+	{
+		cout<<"BF暴力算法的匹配次数为："<<BFcalculation(p,t)<<endl;
+		cout<<"KMP算法的匹配次数为："<<KMPcalculation(p,t)<<endl;
+	}
+	return 0;
+}
