@@ -3,7 +3,7 @@
 #include <string>
 using namespace std;
 char p[10000],t[10000];
-int BFcalculation(char *P,char *T)
+int BFcalculation(char *T,char *P)
 {
 	int length1=strlen(P);
 	int length2=strlen(T);
@@ -25,7 +25,7 @@ int BFcalculation(char *P,char *T)
 	}
 	return comparison;
 }
-int KMPcalculation(char *P, char *T)
+int KMPcalculation(char *T, char *P)
 {
 	int comparison=0,m=0,n=0;
 	int length1=strlen(P);
@@ -66,3 +66,4 @@ int main()
 	}
 	return 0;
 }
+
