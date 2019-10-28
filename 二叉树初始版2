@@ -1,7 +1,10 @@
 #include <iostream>
 #include <queue>
 #include <stack>
+#include <vector>
+#include <string>
 using namespace std;
+
 template<class T>
 struct Node {
 	T data;
@@ -37,7 +40,22 @@ public:
 	BinTreeNode<T> *CopyBinaryTree(BinTreeNode<T> *p); // 复制二叉树
 	bool isEqual(BinTreeNode<T>* p1, BinTreeNode<T>* p2); // 判断两棵二叉树是否等价
 	void LinkToSequence(BinTreeNode<T>* p, T arr[], int i); // 将二叉链式存储结构转换为顺序存储结构
+	void Printing(BinTreeNode<T> *root, int n);
+	//BinTreeNode<T> *CreateBinaryTree2(T *VLR,T *LVR,int n);
+	BinTreeNode<T> *createBinaryTree2(T *VLR,T *LVR,int n);
+	BinTreeNode<T> *createBinaryTree3(T *LVR,T *LRV,int n);
+	void PrintBiTree(BinTreeNode<T>* t, int level);
 	void MakeEmpty(BinTreeNode<T>* p); // 清空二叉树
+//	int buildTreeChild(int preorder[], int inorder[], int inbegin,int inend);
+	//int buildTree(int preorder[], int inorder[]);
+	//int find(int inorder[], int inbegin,int inend,int val);
+	//int locat(int x,int *Arr);
+//	void wangbuild(BinTreeNode<T> *root,int a[],int b[],int y) ;
+
+	//void CreatBT1(BinTreeNode<T>* pre,BinTreeNode<T>* in, int n);
+	//void buildTree(vector<int>& preorder, vector<int>& inorder);
+	//void buildTree(vector<int>& preorder, vector<int>& inorder);
+	//void CreatBT1(vector<int>& preorder,vector<int>& inorder,int ps,int pe,int is,int ie);
 	//void insert(long value, String aValue);
 };
 
@@ -64,45 +82,81 @@ BinTreeNode<T> *BinaryTree<T>::CreateBinaryTree() {
 }
 
 
-/*template<class T>
-void BinaryTree<T>::insert(long value, String aValue) {
-//public Node root;
-//插入节点
-
-	//封装节点
-	Node newNode = new Node(value, aValue);
-	//引用当前节点
-	Node current = root;
-	//引用父节点
-	Node parent;
-	//如果root为null,也就是第一次插入的时候
-	if (root == null) {
-		root = newNode;
-		return;
-	}
-	else {
-		while (true) {
-			//父节点指向当前节点
-			parent = current;
-			//如果当前指向的节点数据比插入的要大，则向左走
-			if (current.date > value) {
-				current = current.leftChild;
-				if (current == null) {
-					parent.leftChild = newNode;
-					return;
-				}
-			}
-			else {
-				current = current.rightChild;
-				if (current == null) {
-					parent.rightChild = newNode;
-					return;
-				}
-			}
-		}
-	}
+template<class T>
+BinTreeNode<T> *BinaryTree<T>::createBinaryTree2(T *VLR,T *LVR,int n)//前序和中序 
+{
+	BinTreeNode<T> *t;
+	if(n == 0)return NULL;
+	int k = 0;
+	while(VLR[0] != LVR[k]&&LVR[k] != '\0')k++;
+	if(k == n)
+	{
+		cout<<"输入的前序和中序序列有误"<<endl;
+		return NULL;
+	} 
+t = new BinTreeNode<T>();
+	t->data = VLR[0];
+//	t->leftChild = createBinaryTree(VLR+1,LVR,k);
+	t->rightChild = createBinaryTree2(VLR+k+1,LVR+k+1,n-k-1);
+	t->leftChild = createBinaryTree2(VLR+1,LVR,k);
+	return t;
+};
+template<class T>
+BinTreeNode<T> *BinaryTree<T>::createBinaryTree3(T *LVR,T *LRV,int n)//中序和后序 
+{
+	if(n == 0)return NULL;
+	int k = 0;
+	while(LRV[n-1] != LVR[k])k++;
+	if(k == n)
+	{
+		cout<<"输入的前序和中序序列有误"<<endl;
+		return NULL;
+	} 
+	BinTreeNode<T> *t = new BinTreeNode<T>();
+	t->data = LRV[n-1];
+	t->leftChild = createBinaryTree3(LVR,LRV,k);
+	t->rightChild = createBinaryTree3(LVR+k+1,LRV+k,n-k-1);
+	return t;
+} 
+template <class T>
+void BinaryTree<T>::PrintBiTree(BinTreeNode<T>* t, int level) //二叉树t第level层结点数据域显示
+{
+//	char m;
+  if( t == NULL) return;
+  PrintBiTree(t->rightChild,level+1);
+  cin.get();
+  if(level!=0)			
+  {
+  	for(int i=0;i<6*(level-1);i++) cout<<"*";
+	cout << "----";
+  }
+  cout<<t->data<<endl;
+  PrintBiTree(t->leftChild, level+1); 
 }
-*/
+
+
+template<class T>
+void BinaryTree<T>::Printing(BinTreeNode<T> *root, int n)
+{
+    if (root==NULL)
+    {
+        return;
+    }
+    else
+    {
+        Printing(root->rightChild,n+1);
+
+        for (int i=0; i<n;i++)
+            cout << "   ";
+        cout <<root->data<<endl;
+
+        Printing(root->leftChild,n+1);
+    }
+
+}
+
+
+
 
 
 
@@ -496,19 +550,19 @@ int main(int argc, const char * argv[]) {
 		cout << "6:递归中序遍历二叉树\n";
 		cout << "7:递归后序遍历二叉树\n";
 		cout << "8:层次遍历二叉树\n";
-		cout << "9:求叶子的个数\n";
+		//cout << "9:求叶子的个数\n";
 		cout << "10:求二叉树结点的个数\n";
 		cout << "11:求二叉树的深度\n";
-		cout << "12:交换二叉树的左、右子树\n";
-		cout << "13:查找二叉树中是否存在值X\n";
-		cout << "14:判断二叉树是否为空二叉树\n";
-		cout << "15:将二叉树的所有叶子结点从左往右链接成单链表\n";
-		cout << "16:复制二叉树\n";
-		cout << "17:判断两棵二叉树是否等价\n";
-		cout << "18:将二叉链式存储结构转换为顺序存储结构\n";
+		//cout << "12:交换二叉树的左、右子树\n";
+		//cout << "13:查找二叉树中是否存在值X\n";
+	//	cout << "14:判断二叉树是否为空二叉树\n";
+		//cout << "15:将二叉树的所有叶子结点从左往右链接成单链表\n";
+		//cout << "16:复制二叉树\n";
+	//	cout << "17:判断两棵二叉树是否等价\n";
+	//	cout << "18:将二叉链式存储结构转换为顺序存储结构\n";
 		cout << "19:清除二叉树\n";
 		cout << "20:退出\n";
-		cout << "请输入选择（1-20）：\n";
+		cout << "请输入选择（1-21）：\n";
 		cin >> choice;
 		switch (choice) {
 		case 1:
@@ -581,10 +635,10 @@ int main(int argc, const char * argv[]) {
 			root1 = bt.CopyBinaryTree(root);
 			cout << "原二叉树前序遍历：" << "\n";
 			bt.RePreOrder(root);
-			cout << std::endl;
+			cout << endl;
 			cout << "复制的二叉树前序遍历：" << "\n";
 			bt.RePreOrder(root1);
-			cout << std::endl;
+			cout << endl;
 			break;
 		case 17:
 			cout << "请输入第一棵二叉树的数据，建立二叉树：" << "\n";
@@ -608,8 +662,50 @@ int main(int argc, const char * argv[]) {
 		case 20:
 			finished = 0;
 			break;
+		case 21:
+			
+				bt.PrintBiTree(root, 0);
+				break;
+				/*	int x;
+					int a[10000],b[10000];
+					cout<<"请输入遍历序列数组最大下标："<<endl;
+					cin>>x;
+					cout<<"输入前序遍历呦"<<endl;
+					for(int o=0;o<=x;o++)
+					{
+					cin>>a[o];
+					}
+					cout<<"输入中序遍历呦"<<endl;
+					for(int h=0;h<=x;h++)
+					{
+					cin>>b[h];
+					}
+					bt.wangbuild(root,a,b,x);
+			}
+					break;
+					*/
+		case 22:
+			{
+			/*int a,b,n;
+	        char VLR[10000],LVR[10000];
+			cin>>n;
+			for(a=0;a<n;a++)
+			{
+				cin>>VLR[a];
+			}
+			for(b=0;b<n;b++)
+			{
+				cin>>LVR[b];
+			}*/
+	char VLR[]="ABCDGIEFH";
+	char LVR[]="CBGDIAFEH";
+	char LRV[]="CGIDBFHEA"; 
+	root=bt.createBinaryTree2(VLR,LVR,9);
+		bt.PrintBiTree(root,0);
+			}
+			break;
 		default:
-			cout << "输入错误，请重新输入！" << std::endl;
+			cout << "输入错误，请重新输入！" << endl;
 			break;
 		}
 	}
