@@ -1,0 +1,747 @@
+
+#include<iostream>
+#include<cstring>
+#include<stack>
+#include<cstdio>
+#include<ctime>
+#include<cmath>
+#include<cstdlib>
+//#include<assert.h>
+#include <cassert>
+using namespace std;
+#define MOD 10
+int Partition(int a[], int low, int high)
+{
+	//假设每次都以第一个元素作为枢轴值，进行一趟划分：
+	int pivot = a[low];
+
+	while (low < high)
+	{
+		while (low < high && a[high] >= pivot)
+			--high;
+		a[low] = a[high];  //停下来做交换 
+		while (low < high && a[low] <= pivot)
+			++low;
+		a[high] = a[low];  //停下来做交换 
+	}
+
+	a[low] = pivot;  //pivot的最终落点 
+	return low;
+}
+
+
+//非递归改进快排
+void QuickSort2(int* arr, int low, int high)
+{
+	stack<int> st;
+	if (low < high)
+	{
+		int mid = Partition(arr,low, high);
+		if (low < mid - 1)
+		{
+			st.push(low);
+			st.push(mid - 1);
+		}
+		if (mid + 1 < high)
+		{
+			st.push(mid + 1);
+			st.push(high);
+		}
+		while (!st.empty())
+		{
+			int q = st.top();
+			st.pop();
+			int p = st.top();
+			st.pop();
+			mid = Partition(arr,p, q);
+			if (p < mid - 1)
+			{
+				st.push(p);
+				st.push(mid - 1);
+			}
+			if (mid + 1 < q)
+			{
+				st.push(mid + 1);
+				st.push(q);
+			}
+		}
+	}
+}
+
+//非递归快排
+void QuickSort(int a[], int left, int right)
+{
+	//手动利用栈来存储每次分块快排的起始点
+	//栈非空时循环获取中轴入栈
+	stack<int> s;
+	if (left < right)
+	{
+		int boundary = Partition(a, left, right);
+
+		if (boundary - 1 > left) //确保左分区存在 
+		{
+			//将左分区端点入栈 
+			s.push(left);
+			s.push(boundary - 1);
+		}
+		if (boundary + 1 < right) //确保右分区存在 
+		{
+			s.push(boundary + 1);
+			s.push(right);
+		}
+
+		while (!s.empty())
+		{
+			//得到某分区的左右边界 
+			int r = s.top();
+			s.pop();
+			int l = s.top();
+			s.pop();
+
+			boundary = Partition(a, l, r);
+			if (boundary - 1 > l) //确保左分区存在 
+			{
+				//将左分区端点入栈 
+				s.push(l);
+				s.push(boundary - 1);
+			}
+			if (boundary + 1 < r) //确保右分区存在 
+			{
+				s.push(boundary + 1);
+				s.push(r);
+			}
+		}
+	}
+}
+//typedef int STDatatype;
+//const int MaxN = 1e7 + 10;
+
+//typedef struct Stack
+//{
+//	STDatatype* _a;
+//	int _top;//栈顶
+//	int _capacity;//容量
+//}Stack;
+//int Partition(const int low, const int high)
+//{
+//	int pivotpos = low;
+//	int pivot = arr[low];
+//	for (int i = low + 1; i <= high; i++)
+//	{
+//		if (arr[i] < pivot)
+//		{
+//			pivotpos++;
+//			if (pivotpos != i)
+//				swap(arr[pivotpos], arr[i]);
+//		}
+//	}
+//	arr[low] = arr[pivotpos];
+//	arr[pivotpos] = pivot;
+//	return pivotpos;
+//}
+//void StackInit(Stack* ps)
+//{
+//	assert(ps);
+//	ps->_a = NULL;
+//	ps->_capacity = 0;
+//	ps->_top = 0;
+//}
+//
+//void StackDestory(Stack* ps)
+//{
+//	assert(ps);
+//	free(ps->_a);
+//	ps->_a = NULL;
+//	ps->_capacity = 0;
+//	ps->_top = 0;
+//
+//}
+//
+//void StackPush(Stack* ps, STDatatype x)
+//{
+//	assert(ps);
+//	if (ps->_top == ps->_capacity)
+//	{
+//		size_t newcapacity = ps->_capacity == 0 ? 4 : ps->_capacity * 2;
+//		ps->_a = (STDatatype*)realloc(ps->_a, sizeof(STDatatype) * newcapacity);
+//		assert(ps->_a);
+//		ps->_capacity = newcapacity;
+//	}
+//	ps->_a[ps->_top] = x;
+//	ps->_top++;
+//}
+//
+//void StackPop(Stack* ps)
+//{
+//	assert(ps && ps->_top > 0);
+//	ps->_top--;
+//}
+//
+//STDatatype StackTop(Stack* ps)
+//{
+//	assert(ps);
+//	return ps->_a[ps->_top - 1];
+//}
+//
+//int StackEmpty(Stack* ps)
+//{
+//	assert(ps);
+//	return ps->_top == 0 ? 0 : 1;
+//}
+//
+//void QuickSortFDG(int* arr, int left, int right)
+//{
+//	Stack st;
+//	StackInit(&st);
+//	StackPush(&st, right);
+//	StackPush(&st, left);
+//	while (StackEmpty(&st) != 0)
+//	{
+//		int begin = StackTop(&st);
+//		StackPop(&st);
+//		int end = StackTop(&st);
+//		StackPop(&st);
+//		int div = Partition(begin, end);                       //[div+1,end]
+//		if (div + 1 < end)//在此区间有元素就进栈
+//		{
+//			StackPush(&st, end);
+//			StackPush(&st, div + 1);
+//		}
+//		//[begin,div-1]
+//
+//		if (begin < div - 1)//在此区间有元素就进栈
+//		{
+//			StackPush(&st, div - 1);
+//			StackPush(&st, begin);
+//		}
+//	}
+//}
+
+
+void swap(int arr[], int a, int b) {
+	int temp = arr[a];
+	arr[a] = arr[b];
+	arr[b] = temp;
+}
+/**************************************/
+//插入排序  O(n^2) 稳定 
+//void InsertSort(int a[], int len) {
+//	for (int i = 0; i < len; i++) {
+//		int temp = a[i];
+//		for (int j = i - 1; j >= 0; j--) {
+//			if (temp < a[j]) {
+//				a[j + 1] = a[j];
+//				a[j] = temp;
+//			}
+//			else break;
+//		}
+//	}
+//}
+/**************************************/
+
+/**************************************/
+//折半插入排序  O(nlog2(n)) 稳定 
+//int low, high, middle;
+//void BinaryInsertSort(int a[], int len) {
+//	for (int i = 0; i < len; i++) {
+//		int temp = a[i];
+//		low = 0; high = i - 1;
+//		while (low <= high) {
+//			middle = (low + high) / 2;
+//			if (temp < a[middle]) {
+//				high = middle - 1;
+//			}
+//			else {
+//				low = middle + 1;
+//			}
+//		}
+//		for (int k = i; k > low; k--) {
+//			a[k] = a[k - 1];
+//		}
+//		a[low] = temp;
+//	}
+//}
+/**************************************/
+
+/**************************************/
+//希尔排序  速度很难定量 但是效率挺高的 不稳定的算法 
+//void Shellsort(int a[], int len) {
+//	int gap = len - 1;  //初始增量 
+//	bool flag = 0;
+//	while (gap >= 1) {
+//		if (gap == 1) flag = 1;
+//		for (int i = 0; i < len; i++) {
+//			if (i + gap < len) {
+//				if (a[i] > a[i + gap]) {
+//					int temp = a[i];
+//					a[i] = a[i + gap];
+//					a[i + gap] = temp;
+//				}
+//			}
+//			else break;
+//		}
+//		gap = gap / 3 + 1;
+//		if (flag) break;
+//	}
+//}
+/**************************************/
+
+# define MAX 10000000
+
+/**************************************/
+//快速排序
+//void QuickSort(int a[], int len) {
+//	if (len > 1) {
+//		int temp = a[0], pivotpos = 0;
+//		int left[MAX], l = 0;
+//		int right[MAX], r = 0;
+//		for (int i = 1; i < len; i++) {
+//			if (a[i] >= temp) {
+//				right[r++] = a[i];
+//				pivotpos++;
+//			}
+//			else {
+//				left[l++] = a[i];
+//			}
+//		}
+//
+//		QuickSort(left, l);
+//		QuickSort(right, r);
+//
+//		for (int i = 0; i < len; i++) {
+//			if (i < l) {
+//				a[i] = left[i];
+//			}
+//			else if (i > l) {
+//				a[i] = right[i - l - 1];
+//			}
+//			else {
+//				a[i] = temp;
+//			}
+//		}
+//
+//	}
+//}
+
+
+
+void quickSort(int a[], int left, int right) {//改进版快排
+	if (right <= left)
+		return;
+
+	/*
+	 * 工作指针
+	 * p指向序列左边等于pivot元素的位置
+	 * q指向序列右边等于Pivot元素的位置
+	 * i指向从左向右扫面时的元素
+	 * j指向从右向左扫描时的元素
+	 */
+	int p, q, i, j;
+	int pivot;// 锚点
+	i = p = left;
+	j = q = right - 1;
+	/*
+	 * 每次总是取序列最右边的元素为锚点
+	 */
+	pivot = a[right];
+	while (true) {
+		/*
+		 * 工作指针i从右向左不断扫描，找小于或者等于锚点元素的元素
+		 */
+		while (i < right && a[i] <= pivot) {
+			/*
+			 * 找到与锚点元素相等的元素将其交换到p所指示的位置
+			 */
+			if (a[i] == pivot) {
+				swap(a, i, p);
+				p++;
+			}
+			i++;
+		}
+		/*
+		 * 工作指针j从左向右不断扫描，找大于或者等于锚点元素的元素
+		 */
+		while (left <= j && a[j] >= pivot) {
+			/*
+			 * 找到与锚点元素相等的元素将其交换到q所指示的位置
+			 */
+			if (a[j] == pivot) {
+				swap(a, j, q);
+				q--;
+			}
+			j--;
+		}
+		/*
+		 * 如果两个工作指针i j相遇则一趟遍历结束
+		 */
+		if (i >= j)
+			break;
+
+		/*
+		 * 将左边大于pivot的元素与右边小于pivot元素进行交换
+		 */
+		swap(a, i, j);
+		i++;
+		j--;
+	}
+	/*
+	 * 因为工作指针i指向的是当前需要处理元素的下一个元素
+	 * 故而需要退回到当前元素的实际位置，然后将等于pivot元素交换到序列中间
+	 */
+	i--;
+	p--;
+	while (p >= left) {
+		swap(a, i, p);
+		i--;
+		p--;
+	}
+	/*
+	 * 因为工作指针j指向的是当前需要处理元素的上一个元素
+	 * 故而需要退回到当前元素的实际位置，然后将等于pivot元素交换到序列中间
+	 */
+	j++;
+	q++;
+	while (q <= right) {
+		swap(a, j, q);
+		j++;
+		q++;
+	}
+
+	/*
+	 * 递归遍历左右子序列
+	 */
+	quickSort(a, left, i);
+	quickSort(a, j, right);
+}
+
+//int ArrLength(int a[]) {
+//		int i = 0;
+//		while (a[i])
+//			i++;
+//		return i;
+//	}
+void quick(int a[],int row) {
+	int n = row;
+	/*cout << n << endl;*/
+	if (n > 0) {
+		quickSort(a, 0, n-1);
+	}
+}
+
+//int ArrLength(int a[]) {
+//	int i = 0;
+//	while (a[i])
+//		i++;
+//	return i;
+//}
+
+/*
+改进方法：
+插入排序对基本有序的序列具有很高的效率，
+所以在左右划分以后，如果序列的长度比较小，
+可以先不排列（长度一般在5-25），直接放着，
+最后用插入排序，这种混合算法效率更高
+
+*/
+
+/**************************************/
+
+
+/***************************************/
+//直接选择排序
+//适用于的元素规模很大的序列，即移动操作十分耗时的操作
+//该算法的移动操作比其他算法少 
+//void SelectSort(int a[], int len) {
+//	for (int i = 0; i < len; i++) {
+//		int index = i;
+//		int min = a[i];
+//		for (int j = i; j < len; j++) {
+//			if (a[j] < min) {
+//				min = a[j];
+//				index = j;
+//			}
+//		}
+//		if (index != i) {
+//			int temp = a[i];
+//			a[i] = a[index];
+//			a[index] = temp;
+//		}
+//	}
+//}
+/***************************************/
+
+void adjust(int a[], int len, int index)
+{
+	int left = 2 * index + 1; // index的左子节点
+	int right = 2 * index + 2;// index的右子节点
+
+	int maxIdx = index;
+	if (left<len && a[left] > a[maxIdx])     maxIdx = left;
+	if (right<len && a[right] > a[maxIdx])     maxIdx = right;
+
+	if (maxIdx != index)
+	{
+		swap(a[maxIdx], a[index]);
+		adjust(a, len, maxIdx);
+	}
+
+}
+
+// 堆排序
+void HeapSort(int a[], int size)
+{
+	// 构建大根堆（从最后一个非叶子节点向上）
+	for (int i = size / 2 - 1; i >= 0; i--)
+	{
+		adjust(a, size, i);
+	}
+
+	// 调整大根堆
+	for (int i = size - 1; i >= 1; i--)
+	{
+		swap(a[0], a[i]);           // 将当前最大的放置到数组末尾
+		adjust(a, i, 0);              // 将未完成排序的部分继续进行堆排序
+	}
+}
+/***************************************/
+/*     堆排序
+最大堆（升序） 不稳定排序 */
+void heapSort(int a[], int len) {
+	for (int i = len; i > 0; i--) {
+		int temp;
+		for (int j = i / 2 - 1; j >= 0; j--) {
+			if (2 * j + 1 < i)
+				if (a[2 * j + 1] >= a[j]) {
+					temp = a[2 * j + 1];
+					a[2 * j + 1] = a[j];
+					a[j] = temp;
+				}
+			if (2 * j + 2 < i)
+				if (a[2 * j + 2] >= a[j]) {
+					temp = a[2 * j + 2];
+					a[2 * j + 2] = a[j];
+					a[j] = temp;
+				}
+		}
+		temp = a[0];
+		a[0] = a[i - 1];
+		a[i - 1] = temp;
+	}
+}
+/***************************************/
+
+
+/***************************************/
+/*归并排序*/
+void mergeSort(int a[], int len) {
+	if (len <= 1) return;
+	if (len == 2) {
+		if (a[0] > a[1]) {
+			int temp = a[0];
+			a[0] = a[1];
+			a[1] = temp;
+		}
+		return;
+	}
+
+	//分 ： 
+	int* b;
+	b = new int[len];
+	int* c;
+	c = new int[len];
+	//int b[MAX], c[MAX];
+	int p = 0, q = 0;
+	for (int i = 0; i < len; i++) {
+		if (i <= len / 2) {
+			b[p++] = a[i];
+		}
+		else {
+			c[q++] = a[i];
+		}
+	}
+
+	mergeSort(b, p);
+	mergeSort(c, q);
+
+	//合并（治） ： 
+	int i = 0, j = 0, k = 0;
+	while (i < p && j < q) {
+		if (b[i] <= c[j]) {
+			a[k++] = b[i++];
+		}
+		else {
+			a[k++] = c[j++];
+		}
+	}
+
+	while (i < p) {
+		a[k++] = b[i++];
+	}
+	while (j < q) {
+		a[k++] = c[j++];
+	}
+	delete[] b;
+	delete[] c;
+}
+/***************************************/
+
+
+int main() {//测试部分
+	int choice,row3, row1, row2, row4,row5,finished=1;
+	//int arr[MaxN];
+	while (finished) {
+		cout << "\n*********菜单*********\n";
+		cout << "1:递归快速排序改进版\n";
+		cout << "2:递归归并排序\n";
+		cout << "3:递归堆排序\n";
+		cout << "4:非递归快速排序\n";
+		cout << "5:非递归快速排序改进版\n";
+		//cout << "5:非递归堆排序\n";
+		//cout << "6:非递归归并排序\n";
+		cout << "6:退出\n";
+		cout << "请输入选择（1-7）：\n";
+		cin >> choice;
+		switch (choice) {
+		case 1:
+			cout << "输入一维数组的行" << endl;
+			cin >> row1;
+			int* p1;
+			p1 = new int[row1];
+			//输入一维数组的值  
+			for (int i = 0; i < row1; i++)
+				p1[i] = rand() % 10000;
+			//输出一维数组  
+			  // for (int i = 0; i < row; i++)
+			  //    cout << p1[i] << ' ';
+			cout << endl;
+			quick(p1, row1);
+			cout << "正序输出" << endl;
+			for (int i = 0; i < row1; i++)
+				cout << p1[i] << ' ';
+			cout << endl;
+			cout << "逆序输出" << endl;
+			for (int i = row1 - 1; i >= 0; i--)
+				cout << p1[i] << ' ';
+			//释放一维数组  
+			delete[] p1;
+			break;
+		case 2:
+			cout << "输入一维数组的行" << endl;
+			cin >> row2;
+			int* p2;
+			p2 = new int[row2];
+			//输入一维数组的值  
+			for (int i = 0; i < row2; i++)
+				p2[i] = rand() % 10000;
+			//输出一维数组  
+			   // for (int i = 0; i < row1; i++)
+			   //   cout << p2[i] << ' ';
+			cout << endl;
+			mergeSort(p2, row2);
+			cout << "正序输出" << endl;
+			for (int i = 0; i < row2; i++)
+				cout << p2[i] << ' ';
+			cout << endl;
+			cout << "逆序输出" << endl;
+			for (int i = row2-1; i >= 0; i--)
+				cout << p2[i] << ' ';
+			//释放一维数组  
+			delete[] p2;
+			break;
+		case 3:
+			cout << "输入一维数组的行" << endl;
+			cin >> row3;
+			int* p3;
+			p3= new int[row3];
+			//输入一维数组的值  
+			for (int i = 0; i < row3; i++)
+				p3[i] = rand() % 10000;
+			//输出一维数组  
+			  //  for (int i = 0; i < row2; i++)
+			   //   cout << p3[i] << ' ';
+			cout << endl;
+			HeapSort(p3, row3);
+			cout << "正序输出" << endl;
+			for (int i = 0; i < row3; i++)
+				cout << p3[i] << ' ';
+			cout << endl;
+			cout << "逆序输出" << endl;
+			for (int i = row3 - 1; i >= 0; i--)
+				cout << p3[i] << ' ';
+			//释放一维数组  
+			delete[] p3;
+			break;
+		case 4:
+			cout << "输入一维数组的行" << endl;
+			cin >> row4;
+			int* p4;
+			p4 = new int[row4];
+			//输入一维数组的值  
+			for (int i = 0; i < row4; i++)
+				p4[i] = rand() % 10000;
+			//输出一维数组  
+			   // for (int i = 0; i < row5; i++)
+			   //   cout << p6[i] << ' ';
+			cout << endl;
+			QuickSort(p4, 0, row4-1);
+			cout << "正序输出" << endl;
+			for (int i = 0; i < row4; i++)
+				cout << p4[i] << ' ';
+			cout << endl;
+			cout << "逆序输出" << endl;
+			for (int i = row4 - 1; i >= 0; i--)
+				cout << p4[i] << ' ';
+			//释放一维数组  
+			delete[] p4;
+			break;
+		case 5:
+			cout << "输入一维数组的行" << endl;
+			cin >> row5;
+			int* p5;
+			p5 = new int[row5];
+			//输入一维数组的值  
+			for (int i = 0; i < row5; i++)
+				p5[i] = rand() % 10000;
+			//输出一维数组  
+			   // for (int i = 0; i < row6; i++)
+			   //   cout << p7[i] << ' ';
+			cout << endl;
+			QuickSort2(p5, 0, row5- 1);
+			cout << "正序输出" << endl;
+			for (int i = 0; i < row5; i++)
+				cout << p5[i] << ' ';
+			cout << endl;
+			cout << "逆序输出" << endl;
+			for (int i = row5 - 1; i >= 0; i--)
+				cout << p5[i] << ' ';
+			//释放一维数组  
+			delete[] p5;
+			break;
+		case 6:
+			finished = 0;
+			break;
+		}
+	}
+
+
+
+
+	//srand((int)time(0));
+	//int a[MOD];
+	//for (int i = 0; i <= MOD; i++)
+	//{
+	//	a[i] = rand()%100;
+	//}
+	//for (int i = 0; i < 10; i++) {
+	//	cout << a[i] << " ";
+	//}
+	////int a[] = { 21,25,49,25,16,8 };
+	////int n = a.length;
+	//quick(a);
+	////mergeSort(a, 6); //更改此函数进行测试 
+	//for (int i = 0; i < 10; i++) {
+	//	cout << a[i] << " ";
+	//}
+	//cout << endl;
+	return 0;
+}
