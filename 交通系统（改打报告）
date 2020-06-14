@@ -7,8 +7,8 @@
 #include <algorithm>
 using namespace std;
 typedef long long ll;
-typedef pair<int, int> p;
 const int inf = 0x3f3f3f3f;
+typedef pair<int, int> p;
 const int maxn = 50;
 const int maxm = 5e3;
 bool initornot, floyd_done, vis[maxn], adj[maxn][maxn];
