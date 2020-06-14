@@ -79,19 +79,19 @@ int bfs(int src, int des)
     memset(vis, false, sizeof(vis));
     queue<p> q;
     vis[src] = true;
-    q.push(p(src, 0));
+    q.push(p(src, 0));//将起点放入队列
     while (!q.empty())
     {
-        int u = q.front().first, s = q.front().second;
-        if (u == des) return s - 1;
-        q.pop();
-        for (int i = head[u]; ~i; i = e[i].t)
+        int u = q.front().first, s = q.front().second;//利用pair得出前后双值
+        if (u == des) return s - 1;//若相邻返回0，清晰得出相隔状况
+        q.pop();//计算后将其拿出
+        for (int i = head[u]; i！=-1; i = e[i].t)
         {
             int v = e[i].v;
             if (!vis[v])
             {
                 vis[v] = true;
-                q.push(p(v, s + 1));
+                q.push(p(v, s + 1));//再次放入
             }
         }
     }
@@ -107,16 +107,16 @@ void verification()
 
 void dfs(int now, int des, int step, int sum, vector<int> res_now)
 {
-    if (step > 10) return;
-    vis[now] = true;
+    if (step > 10) return;//超过10的路径不予输出
+    vis[now] = true;//当前位置标识为真
     res_now.push_back(now);
-    if (now == des)
+    if (now == des)//如果当前为中点停止后续直接返回
     {
         res_now.push_back(sum);
         res.push_back(res_now);
         return;
     }
-    for (int i = head[now]; ~i; i = e[i].t)
+    for (int i = head[now]; i！=-1; i = e[i].t)
     {
         int nxt = e[i].v;
         if (vis[nxt]) continue;
@@ -133,22 +133,22 @@ bool cmp(const vector<int>& va, const vector<int>& vb)
 void GetPath()
 {
     res.clear();
-    memset(vis, false, sizeof(vis));
+    memset(vis, false, sizeof(vis));//初始化vis数组
     cout << "输入起点和终点(中文): ";
     string start, end;
     cin >> start >> end;
-    if (id.find(start) == id.end() || id.find(end) == id.end())
+    if (id.find(start) == id.end() || id.find(end) == id.end())//利用find函数寻找地点是否存在
     {
         cout << "没有此地点" << endl << endl;
         return;
     }
-    int idstart = id[start], idend = id[end];
+    int idstart = id[start], idend = id[end];//定义新变量存储起始地点id
     dfs(idstart, idend, 0, 0, {});
-    sort(res.begin(), res.end(), cmp);
+    sort(res.begin(), res.end(), cmp);//得到路径后的排序
     int num = 0;
-    for (auto vec : res)
+    for (auto vec : res)//auto函数来进行数组之间的复制和循环
     {
-        out << "第 " << num++ << " 条路径" << endl;
+        out << "第 " << num++ << " 条路径" << endl;//通过前面定义的输出流来导入txt文件
         for (int i = 0; i < vec.size() - 2; i++)
             out << "从 " << city[vec[i]] << " 到 " << city[vec[i + 1]] << endl;
         out << "总路程为 " << vec[vec.size() - 1] << endl << endl;
@@ -158,73 +158,77 @@ void GetPath()
 
 void Dijkstra(bool flag)
 {
-    memset(dis, 0x3f, sizeof(dis));
-    memset(vis, false, sizeof(vis));
+    memset(dis, 0x3f, sizeof(dis));//初始化dis数组
+    memset(vis, false, sizeof(vis));//初始化vis数组
     cout << "请分别输入起点和终点的名称: ";
     string citystart, cityend;
     cin >> citystart >> cityend;
-    if (id.find(citystart) == id.end() || id.find(cityend) == id.end())
+    if (id.find(citystart) == id.end() || id.find(cityend) == id.end())//find函数判断地点是否存在
     {
         cout << "没有此地点" << endl << endl;
         return;
     }
     int id_site = 0;
-    if (flag)
+    if (flag)//由于前面布尔类型变量的设定，此处进入绕过地点的选择
     {
         cout << "请分别输入起点名称和终点名称: ";
         string citysite;
         cin >> citysite;
-        if (id.find(citysite) == id.end())
+        if (id.find(citysite) == id.end())//find函数判断地点是否存在
         {
             cout << "没有此地点" << endl << endl;
+            return;
+        }
+         if (id.find(citysite) == id.find(citystart) || id.find(citysite) == id.find(cityend)) {//若需要绕过的城市为起点或终点
+            cout << "该城市无法绕行" << endl;
             return;
         }
         id_site = id[citysite];
     }
     priority_queue<p, vector<p>, greater<p> > q;
     int idstart = id[citystart], idend = id[cityend];
-    q.push(p(dis[idstart] = 0, idstart));
-    while (!q.empty())
+    q.push(p(dis[idstart] = 0, idstart));//起点进入队列
+    while (!q.empty())//以队列的空与否为循环判断条件
     {
         int u = q.top().second;
-        q.pop();
+        q.pop();//队列弹出当前城市
         if (vis[u]) continue;
         vis[u] = true;
-        for (int i = head[u]; ~i; i = e[i].t)
+        for (int i = head[u]; i！=-1; i = e[i].t)//循环得到城市的下一个邻接城市
         {
             int v = e[i].v, w = e[i].w;
-            if (v != id_site && dis[v] > dis[u] + w)
+            if (v != id_site && dis[v] > dis[u] + w)//当城市v的距离大于当前最小距离
             {
                 pre[v] = u;
-                dis[v] = dis[u] + w;
-                q.push(p(dis[v], v));
+                dis[v] = dis[u] + w;//刷新到v的最短距离
+                q.push(p(dis[v], v));//v进入队列
             }
         }
     }
     cout << endl << citystart << " 到 " << cityend << " 的最短路径为: " << endl;
     int top = 0;
-    for (int i = idend; i != idstart; i = pre[i]) sta[top++] = i;
+    for (int i = idend; i != idstart; i = pre[i]) sta[top++] = i;//放入另外一个数组
     for (int i = top - 1, last = idstart; i >= 0; i--)
     {
         int u = last, v = sta[i];
         cout << "从 " << city[u] << " 到 " << city[v] << endl;
         last = v;
     }
-    cout << "总路程为 " << dis[idend] << endl << endl;
+    cout << "总路程为 " << dis[idend] << endl << endl;//输出路径长度
 }
 
-void floyddan(int n)
+void floyd(int n)//弗洛伊德求最短路径
 {
     if (!floyd_done)
         for (int k = 1; k <= n; k++)
             for (int i = 1; i <= n; i++)
                 for (int j = 1; j <= n; j++)
-                    g[i][j] = min(g[i][j], g[i][k] + g[k][j]);
+                    g[i][j] = min(g[i][j], g[i][k] + g[k][j]);//来回比较得出比较后的结果
     floyd_done = true;
     cout << "请分别输入起点名称和终点名称: ";
     string citystart, cityend;
     cin >> citystart >> cityend;
-    if (id.find(citystart) == id.end() || id.find(cityend) == id.end())
+    if (id.find(citystart) == id.end() || id.find(cityend) == id.end())//find函数判断地点是否存在
     {
         cout << "地点不存在" << endl << endl;
         return;
@@ -232,7 +236,32 @@ void floyddan(int n)
     int idstart = id[citystart], idend = id[cityend];
     cout << endl << citystart << " 到 " << cityend << " 的最短路径长为: " << g[idstart][idend] << endl;
 }
+断！！！
+void floyd(int n)//用弗洛伊德算法求最短路径
+{
+    if (!S){
+        for (int k = 1; k <= n; k++){
+            for (int i = 1; i <= n; i++){
+                for (int j = 1; j <= n; j++){
+                    g[i][j] = min(g[i][j], g[i][k] + g[k][j]);//循环比较得到各个城市之间的最短距离
+                }
+            }
+        }
+    }
+    S = true;
+    cout << "请分别输入起点名称和终点名称: ";
+    string citya, cityb;
+    cin >> citya >> cityb;
+    if (id.find(citya) == id.end() || id.find(cityb) == id.end())//如果输入的城市不存在
+    {
+        cout << "地点不存在" << endl << endl;
+        return;
+    }
+    int ida = id[citya], idb = id[cityb];
+    cout << endl << citya << "到" << cityb << "的最短路径长为:" << g[ida][idb] << endl;
+}
 
+收！！！
 void floydall(int n)
 {
     if (!floyd_done)
@@ -246,6 +275,19 @@ void floydall(int n)
             cout << city[i] << " 到 " << city[j] << " 的最短路径长为 " << g[i][j] << endl;
     cout << endl;
 }
+void Menu()
+{
+    cout << "请输入您选择的功能" << endl;
+    cout << "---------------------" << endl << endl;
+    cout << "1:初始化" << endl;
+    cout << "2:计算各地市中转次数判断是否超过两省" << endl ;
+    cout << "3:输入起始地点输出所有路径" << endl ;
+    cout << "4:求最短路径Dijkstra" << endl ;
+    cout << "5:求最短路径 Floyd" << endl ;
+    cout << "6:获取绕开指定地点的单源最短路径 (Dijkstra)" << endl;
+    cout << "7:退出" << endl ;
+    cout << "---------------------" << endl;
+}
 
 bool function()
 {
@@ -258,7 +300,7 @@ bool function()
     case 3: GetPath(); break;
     case 4: Dijkstra(false); break;
     case 5: Dijkstra(true); break;
-    case 6: floyddan(34); break;
+    case 6: floyd(34); break;
     case 7: floydall(34); break;
     case 8: return false;
     default: cout << "请输入1-8的数字。" << endl;
