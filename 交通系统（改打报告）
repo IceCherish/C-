@@ -1,0 +1,289 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <vector>
+#include <queue>
+#include <unordered_map>
+#include <algorithm>
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> p;
+const int inf = 0x3f3f3f3f;
+const int maxn = 50;
+const int maxm = 5e3;
+bool initornot, floyd_done, vis[maxn], adj[maxn][maxn];
+int cont, head[maxn], dis[maxn], pre[maxn], sta[maxn], g[maxn][maxn];
+struct edge { int v, w, t; } e[maxm];
+vector<vector<int>> res;
+unordered_map<string, int> id;
+string city[maxn];
+ifstream in_nei("D:\\neighbor.txt");
+ifstream in_dis("D:\\distance.txt");
+ofstream out("output.txt");
+
+void TianEdgeTu(int a, int v, int w)
+{
+    e[cont].v = v;e[cont].w = w;
+    e[cont].t = head[a];
+    head[a] = cont++;
+}
+
+void Init()
+{
+    if (initornot)
+    {
+        cout << "已经完成初始化过!" << endl << endl;
+        return;
+    }
+    memset(head, -1, sizeof(head));
+    memset(g, 0x3f, sizeof(g));
+    for (int i = 1; i <= 34; i++)
+    {
+        in_nei >> city[i];
+        id[city[i]] = i;
+    }
+    for (int i = 1; i <= 34; i++)
+    {
+        string cityname;
+        in_nei >> cityname;
+        int code = id[cityname];
+        for (int j = 1; j <= 34; j++)
+        {
+            in_nei >> adj[code][j];
+            adj[j][code] = adj[code][j];
+        }
+    }
+    string tmp;
+    for (int i = 33; i >0; i--) in_dis >> tmp;
+    for (int i = 1; i <35; i++)
+    {
+        string cityname;
+        in_dis >> cityname;
+        int code = id[cityname];
+        for (int j = 1; j <= i - 1; j++)
+        {
+            int w;
+            in_dis >> w;
+            if (!adj[code][j]) continue;
+            g[code][j] = g[j][code] = w;
+            TianEdgeTu(code, j, w);
+            TianEdgeTu(j, code, w);
+        }
+    }
+    cout << "成功完成初始化，请进行后续操作。" << endl;
+    initornot = true;
+}
+
+int bfs(int src, int des)
+{
+    memset(vis, false, sizeof(vis));
+    queue<p> q;
+    vis[src] = true;
+    q.push(p(src, 0));
+    while (!q.empty())
+    {
+        int u = q.front().first, s = q.front().second;
+        if (u == des) return s - 1;
+        q.pop();
+        for (int i = head[u]; ~i; i = e[i].t)
+        {
+            int v = e[i].v;
+            if (!vis[v])
+            {
+                vis[v] = true;
+                q.push(p(v, s + 1));
+            }
+        }
+    }
+    return inf;
+}
+
+void verification()
+{
+    for (int i = 1; i <= 34; i++)
+        if (city[i] != "武汉")
+            cout << city[i] << "到武汉至少中转 " << bfs(i, id["武汉"]) << " 次" << endl << endl;
+}
+
+void dfs(int now, int des, int step, int sum, vector<int> res_now)
+{
+    if (step > 10) return;
+    vis[now] = true;
+    res_now.push_back(now);
+    if (now == des)
+    {
+        res_now.push_back(sum);
+        res.push_back(res_now);
+        return;
+    }
+    for (int i = head[now]; ~i; i = e[i].t)
+    {
+        int nxt = e[i].v;
+        if (vis[nxt]) continue;
+        dfs(nxt, des, step + 1, sum + e[i].w, res_now);
+        vis[nxt] = false;
+    }
+}
+
+bool cmp(const vector<int>& va, const vector<int>& vb)
+{
+    return va[va.size() - 1] < vb[vb.size() - 1];
+}
+
+void GetPath()
+{
+    res.clear();
+    memset(vis, false, sizeof(vis));
+    cout << "输入起点和终点(中文): ";
+    string start, end;
+    cin >> start >> end;
+    if (id.find(start) == id.end() || id.find(end) == id.end())
+    {
+        cout << "没有此地点" << endl << endl;
+        return;
+    }
+    int idstart = id[start], idend = id[end];
+    dfs(idstart, idend, 0, 0, {});
+    sort(res.begin(), res.end(), cmp);
+    int num = 0;
+    for (auto vec : res)
+    {
+        out << "第 " << num++ << " 条路径" << endl;
+        for (int i = 0; i < vec.size() - 2; i++)
+            out << "从 " << city[vec[i]] << " 到 " << city[vec[i + 1]] << endl;
+        out << "总路程为 " << vec[vec.size() - 1] << endl << endl;
+    }
+    cout << "长度10以内的路径已输出到文件" << endl << endl;
+}
+
+void Dijkstra(bool flag)
+{
+    memset(dis, 0x3f, sizeof(dis));
+    memset(vis, false, sizeof(vis));
+    cout << "请分别输入起点和终点的名称: ";
+    string citystart, cityend;
+    cin >> citystart >> cityend;
+    if (id.find(citystart) == id.end() || id.find(cityend) == id.end())
+    {
+        cout << "没有此地点" << endl << endl;
+        return;
+    }
+    int id_site = 0;
+    if (flag)
+    {
+        cout << "请分别输入起点名称和终点名称: ";
+        string citysite;
+        cin >> citysite;
+        if (id.find(citysite) == id.end())
+        {
+            cout << "没有此地点" << endl << endl;
+            return;
+        }
+        id_site = id[citysite];
+    }
+    priority_queue<p, vector<p>, greater<p> > q;
+    int idstart = id[citystart], idend = id[cityend];
+    q.push(p(dis[idstart] = 0, idstart));
+    while (!q.empty())
+    {
+        int u = q.top().second;
+        q.pop();
+        if (vis[u]) continue;
+        vis[u] = true;
+        for (int i = head[u]; ~i; i = e[i].t)
+        {
+            int v = e[i].v, w = e[i].w;
+            if (v != id_site && dis[v] > dis[u] + w)
+            {
+                pre[v] = u;
+                dis[v] = dis[u] + w;
+                q.push(p(dis[v], v));
+            }
+        }
+    }
+    cout << endl << citystart << " 到 " << cityend << " 的最短路径为: " << endl;
+    int top = 0;
+    for (int i = idend; i != idstart; i = pre[i]) sta[top++] = i;
+    for (int i = top - 1, last = idstart; i >= 0; i--)
+    {
+        int u = last, v = sta[i];
+        cout << "从 " << city[u] << " 到 " << city[v] << endl;
+        last = v;
+    }
+    cout << "总路程为 " << dis[idend] << endl << endl;
+}
+
+void floyddan(int n)
+{
+    if (!floyd_done)
+        for (int k = 1; k <= n; k++)
+            for (int i = 1; i <= n; i++)
+                for (int j = 1; j <= n; j++)
+                    g[i][j] = min(g[i][j], g[i][k] + g[k][j]);
+    floyd_done = true;
+    cout << "请分别输入起点名称和终点名称: ";
+    string citystart, cityend;
+    cin >> citystart >> cityend;
+    if (id.find(citystart) == id.end() || id.find(cityend) == id.end())
+    {
+        cout << "地点不存在" << endl << endl;
+        return;
+    }
+    int idstart = id[citystart], idend = id[cityend];
+    cout << endl << citystart << " 到 " << cityend << " 的最短路径长为: " << g[idstart][idend] << endl;
+}
+
+void floydall(int n)
+{
+    if (!floyd_done)
+        for (int k = 1; k <= n; k++)
+            for (int i = 1; i <= n; i++)
+                for (int j = 1; j <= n; j++)
+                    g[i][j] = min(g[i][j], g[i][k] + g[k][j]);
+    floyd_done = true;
+    for (int i = 1; i <= n; i++)
+        for (int j = i + 1; j <= n; j++)
+            cout << city[i] << " 到 " << city[j] << " 的最短路径长为 " << g[i][j] << endl;
+    cout << endl;
+}
+
+bool function()
+{
+    int n;
+    cin >> n;
+    switch (n)
+    {
+    case 1: Init(); break;
+    case 2: verification(); break;
+    case 3: GetPath(); break;
+    case 4: Dijkstra(false); break;
+    case 5: Dijkstra(true); break;
+    case 6: floyddan(34); break;
+    case 7: floydall(34); break;
+    case 8: return false;
+    default: cout << "请输入1-8的数字。" << endl;
+    }
+    return true;
+}
+
+void Menu()
+{
+    cout << "请输入您选择的功能" << endl;
+    cout << "---------------------" << endl << endl;
+    cout << "1:初始化交通网络图" << endl << endl;
+    cout << "2:获取各地市到武汉中转次数" << endl << endl;
+    cout << "3:获取指定起点到终点的所有路径" << endl << endl;
+    cout << "4:获取单源最短路径 (Dijkstra)" << endl << endl;
+    cout << "5:获取绕开指定地点的单源最短路径 (Dijkstra)" << endl << endl;
+    cout << "6:获取单源最短路径 (Floyd)" << endl << endl;
+    cout << "7:获取多源最短路径" << endl << endl;
+    cout << "8:退出程序" << endl << endl;
+    cout << "---------------------" << endl;
+}
+
+int main()
+{
+    do Menu();
+    while (function());
+    return 0;
+}
